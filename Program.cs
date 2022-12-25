@@ -1,5 +1,7 @@
 using EntityFrameworkCoreMultiTenancy;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
+using Microsoft.EntityFrameworkCore.SqlServer;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -15,9 +17,10 @@ builder.Services.AddDbContext<Database>((s, o) =>
 {
     var tenant = s.GetService<ITenantGetter>()?.Tenant;
     // for migrations
-    var connectionString = tenant?.ConnectionString ?? "Data Source=default.db";
+    var connectionString = tenant?.ConnectionString ?? "Server=tcp:pantera.database.windows.net,1433;Initial Catalog=develop;Persist Security Info=False;User ID=bizhubadmin;Password=!CowboysFromH3ll;MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;";
     // multi-tenant databases
-    o.UseSqlite(connectionString);
+    o.UseSqlServer(connectionString, builder => builder.EnableRetryOnFailure()).EnableDetailedErrors();
+    //o.UseSqlite(connectionString);
 });
 
 var app = builder.Build();
